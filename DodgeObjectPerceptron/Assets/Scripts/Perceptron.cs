@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 [System.Serializable]
@@ -17,15 +18,18 @@ public class Perceptron : MonoBehaviour
     [TextArea]
     public string Description;
 
-    [Header("===============================================")]
+    
     List<TrainingSet> ts = new List<TrainingSet>();
 	double[] weights = {0,0};
 	double bias = 0;
 	double totalError = 0;
 
+#region === Controlling the NPC ===
+
     /// <summary>
     /// Link to the body here it's NPC
     /// </summary>
+    [Header("===============================================")]
     public GameObject NPC;
 
 
@@ -62,6 +66,7 @@ public class Perceptron : MonoBehaviour
         Train();
     }
 
+#endregion
 
     /// <summary>
     /// Gets the Dot Product of the Current Epoch
@@ -69,7 +74,7 @@ public class Perceptron : MonoBehaviour
     /// <param name="v1"></param>
     /// <param name="v2"></param>
     /// <returns></returns>
-	double DotProductBias(double[] v1, double[] v2) 
+    double DotProductBias(double[] v1, double[] v2) 
 	{
 		if (v1 == null || v2 == null)
 			return -1;
@@ -168,4 +173,50 @@ public class Perceptron : MonoBehaviour
     {
         InitialiseWeights();
     }
+
+    public void Update()
+    {
+        if (Input.GetKeyDown("space"))
+        {
+            InitialiseWeights();
+            ts.Clear();
+        }
+        else if (Input.GetKeyDown("s"))
+        {
+            SaveWeights();
+        }
+        else if (Input.GetKeyDown("l"))
+        {
+            LoadWeights(); 
+        }
+    }
+
+    #region === Saving and loading Weights ===
+
+    public void SaveWeights()
+    {
+        string path = Application.dataPath + "/weights.txt";
+        var sr = File.CreateText(path);
+        sr.WriteLine(weights[0] + "," + weights[1] + "," + bias);
+        sr.Close();
+    }
+
+    public void LoadWeights()
+    {
+        string path = Application.dataPath + "/weights.txt";
+        if (File.Exists(path))
+        {
+            var sr = File.OpenText(path);
+            string line = sr.ReadLine();
+            string[] w = line.Split(',');
+            weights[0] = System.Convert.ToDouble(w[0]);
+            weights[1] = System.Convert.ToDouble(w[1]);
+
+            bias = System.Convert.ToDouble(w[2]);
+            Debug.Log("Loading");
+        }
+    }
+
+    #endregion
+
 }
